@@ -1,0 +1,31 @@
+name: pytest
+
+on: push
+
+jobs:
+  pytest:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@master
+      - name: set up python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - name: install poetry
+        uses: snok/install-poetry@master
+      - name: install dependencies
+        run: make install
+      - name: run linter and tests
+        run:  |
+          make lint
+          make pytest
+      - name: test coverage
+        uses: paambaati/codeclimate-action@v3.2.0
+        if: github.ref_name == 'main'
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageCommand: make coverage
+          debug: true
