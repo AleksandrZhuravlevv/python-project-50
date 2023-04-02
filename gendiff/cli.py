@@ -2,9 +2,9 @@ import json
 
 
 def generate_diff(filename1, filename2):
-    with open('tests/file1.json') as json_file:
+    with open('files/file1.json') as json_file:
         filename1 = json.load(json_file)
-    with open('tests/file2.json') as json_file:
+    with open('files/file2.json') as json_file:
         filename2 = json.load(json_file)
     print('{')
     result = {}
