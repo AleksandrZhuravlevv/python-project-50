@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 import argparse
-import json
 
 
 from gendiff.cli import generate_diff
