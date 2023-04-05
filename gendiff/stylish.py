@@ -72,7 +72,9 @@ def map_value(key_value, depth):
                         + "}\n"
                     )
                 else:
-                    sub_string += "    " * any_depth + key + ": " + str(value[key]) + "\n"
+                    sub_string += (
+                        "    " * any_depth + key + ": " + str(value[key]) + "\n"
+                    )
             return sub_string
 
     if isinstance(key_value, dict):
