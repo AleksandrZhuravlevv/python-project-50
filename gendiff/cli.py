@@ -1,77 +1,44 @@
-from gendiff.parser import definition_form
+import json
+import yaml
+import os.path
 
 
-def stulish(result, lvl=2):
-    final = "{"
-    for str_result in result:
-        if result[str_result] is True or result[str_result] is False:
-            result[str_result] = str(result[str_result]).lower()
-        elif result[str_result] is None:
-            result[str_result] = "null"
+def generate_diff(file_path1, file_path2):
+    (name1, extension1) = os.path.splitext(file_path1)
+    (name2, extension2) = os.path.splitext(file_path2)
+    file1 = {}
+    file2 = {}
+    if (extension1 == '.json') and (extension2 == '.json'):
+        file1 = json.load(open(file_path1))
+        file2 = json.load(open(file_path2))
+    elif (extension1 == '.yaml' and extension2 == '.yaml') or (extension1 == '.yml' and extension2 == '.yml'):
+        file1 = yaml.safe_load(open(file_path1))
+        file2 = yaml.safe_load(open(file_path2))
+    else:
+        return 'Файл не найден'
+    result_dict = file1 | file2
+    sorted_tuple = sorted(result_dict.items(), key=lambda x: x[0])
+    result_dict = dict(sorted_tuple)
+    for key in result_dict:
+        if key in file2 and key in file1:
+            result_dict[key] = [file1[key], file2[key]]
+        elif key in file1:
+            result_dict[key] = [file1[key], None]
+        elif key in file2:
+            result_dict[key] = [None, file2[key]]
+    result_str = "{\n"
+    for key in result_dict:
+        if result_dict[key][0] == result_dict[key][1]:
+            result_str += "    " + key + ": " + result_dict[key][1] + "\n"
+        elif not result_dict[key][1]:
+            result_str += "  - " + key + ": " + str(result_dict[key][0]) + "\n"
+        elif not result_dict[key][0]:
+            result_str += "  + " + key + ": " + str(result_dict[key][1]) + "\n"
         else:
-            result[str_result] = str(result[str_result])
-        final = final + "\n" + str(str_result) + ': ' + result[str_result]
-    final = final + "\n" + (" " * lvl) + "}"
-    return final
-
-
-def generate_key_lists(file1, file2,):
-    common = list()
-    n_common = list()
-    for key1 in file1:
-        if key1 in file2:
-            common.append(key1)
-        else:
-            n_common.append(key1)
-    for key2 in file2:
-        if key2 in file1:
-            continue
-        else:
-            n_common.append(key2)
-    return common, n_common
-
-
-def generate(file1, file2, lvl=2):
-    result = dict()
-    common, not_common = generate_key_lists(file1, file2)[0], generate_key_lists(file1, file2)[1]
-    for key_common in common:
-        new_key1 = (" " * lvl) + "- " + key_common
-        new_key2 = (" " * lvl) + "+ " + key_common
-        new_key_all = (" " * lvl) + "  " + key_common
-        if type(file1[key_common]) is dict and type(file2[key_common]) is dict:
-            result[new_key_all] = stulish(generate(file1[key_common], file2[key_common], lvl + 4), lvl + 2)
-        elif type(file1[key_common]) is dict and type(file2[key_common]) is not dict:
-            result[new_key1] = stulish(generate(file1[key_common], file1[key_common], lvl + 4), lvl + 2)
-            result[new_key2] = file2[key_common]
-        elif type(file1[key_common]) is not dict and type(file2[key_common]) is dict:
-            result[new_key1] = file1[key_common]
-            result[new_key2] = stulish(generate(file2[key_common], file2[key_common], lvl + 4), lvl + 2)
-        elif file1[key_common] != file2[key_common]:
-            result[new_key1] = file1[key_common]
-            result[new_key2] = file2[key_common]
-        else:
-            result[new_key_all] = file1[key_common]
-    for key_not_common in not_common:
-        if key_not_common in file1:
-            new_key1 = (" " * lvl) + "- " + key_not_common
-            if type(file1[key_not_common]) is dict:
-                result[new_key1] = stulish(generate(file1[key_not_common], file1[key_not_common], lvl + 4), lvl + 2)
-            else:
-                result[new_key1] = file1[key_not_common]
-        elif key_not_common in file2:
-            new_key2 = (" " * lvl) + "+ " + key_not_common
-            if type(file2[key_not_common]) is dict:
-                result[new_key2] = stulish(generate(file2[key_not_common], file2[key_not_common], lvl + 4), lvl + 2)
-            else:
-                result[new_key2] = file2[key_not_common]
-    return result
-
-
-def return_result(file_path1, file_path2, formater="stylish"):
-    file1 = definition_form(file_path1)
-    file2 = definition_form(file_path2)
-    if formater == "stylish":
-        return stulish(generate(file1, file2))
+            result_str += "  - " + key + ": " + str(result_dict[key][0]) + "\n"
+            result_str += "  + " + key + ": " + str(result_dict[key][1]) + "\n"
+    result_str += "}"
+    return result_str
 
 
 
