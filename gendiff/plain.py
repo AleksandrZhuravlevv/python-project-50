@@ -1,52 +1,41 @@
 def plain(diff_dict):
-    def make_sub_string(sub_dict, sub_string, path_name):
-        sorted_tuple = sorted(sub_dict.items(), key=lambda x: x[0])
-        sub_dict = dict(sorted_tuple)
-        for key in sub_dict:
-            if isinstance(sub_dict[key], tuple):
-                if len(sub_dict[key][0]) == 0:
-                    sub_string += (
-                        "Property '"
-                        + path_name
-                        + str(key)
-                        + "' was added with value: "
-                        + map_value(sub_dict[key][1]["value"])
-                        + "\n"
-                    )
-                elif len(sub_dict[key][1]) == 0:
-                    sub_string += "Property '" + path_name + key + "' was removed\n"
-                elif sub_dict[key][0] != sub_dict[key][1]:
-                    sub_string += (
-                        "Property '"
-                        + path_name
-                        + key
-                        + "' was updated. From "
-                        + map_value(sub_dict[key][0]["value"])
-                        + " to "
-                        + map_value(sub_dict[key][1]["value"])
-                        + "\n"
-                    )
-            elif isinstance(sub_dict[key], dict):
-                sub_string = make_sub_string(
-                    sub_dict[key], sub_string, path_name + key + "."
-                )
-        return sub_string
+    def make_sub_string(sub_dict, path_name=""):
+        result = []
+        sorted_keys = sorted(sub_dict.keys())
+        for key in sorted_keys:
+            current_path = path_name + key
+            current_value = sub_dict[key]
+            if isinstance(current_value, dict):
+                result.append(make_sub_string(
+                    current_value, current_path + "."))
+            elif isinstance(current_value, tuple):
+                old_value, new_value = current_value
+                if len(old_value) == 0:
+                    result.append(f"Property '{current_path}"
+                                  f"' was added with value:"
+                                  f" {map_value(new_value['value'])}")
+                elif len(new_value) == 0:
+                    result.append(f"Property '{current_path}' was removed")
+                elif old_value != new_value:
+                    result.append(f"Property '{current_path}"
+                                  f"' was updated. From"
+                                  f" {map_value(old_value['value'])}"
+                                  f" to {map_value(new_value['value'])}")
+        return "\n".join(result)
 
-    result = make_sub_string(diff_dict, "", "")
-    result = result.rstrip(result[-1])
-    return result
+    return make_sub_string(diff_dict)
 
 
 def map_value(key_value):
     if isinstance(key_value, dict):
         return "[complex value]"
-    elif str(key_value) == "True":
+    elif key_value is True:
         return "true"
-    elif str(key_value) == "False":
+    elif key_value is False:
         return "false"
-    elif str(key_value) == "None":
+    elif key_value is None:
         return "null"
     elif isinstance(key_value, int):
-        return str(key_value)    
+        return str(key_value)
     else:
-        return "'" + str(key_value) + "'"
+        return f"'{key_value}'"

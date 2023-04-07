@@ -6,9 +6,8 @@ def json_format(diff_dict):
             if isinstance(sub_dict[key], dict):
                 sub_string += "  " * depth + '"' + key + '": {\n'
                 sub_string = (
-                    make_sub_string(sub_dict[key], sub_string, depth + 1)
-                    + "  " * depth
-                    + "}"
+                    make_sub_string(sub_dict[key], sub_string, depth + 1
+                                    ) + "  " * depth + "}"
                 )
             elif isinstance(sub_dict[key], tuple):
                 sub_string += (
