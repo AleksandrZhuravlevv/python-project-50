@@ -6,6 +6,8 @@ from gendiff.build_diff import build_diff
 from gendiff.stylish import stylish
 from gendiff.plain import plain
 from gendiff.json import json_format
+
+
 def generate_diff(file_path1, file_path2, format_name="stylish"):
     (name1, extension1) = os.path.splitext(file_path1)
     (name2, extension2) = os.path.splitext(file_path2)

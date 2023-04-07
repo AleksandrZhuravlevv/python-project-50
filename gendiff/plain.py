@@ -33,6 +33,7 @@ def plain(diff_dict):
         return sub_string
 
     result = make_sub_string(diff_dict, "", "")
+    result = result.rstrip(result[-1])
     return result
 
 
@@ -45,5 +46,7 @@ def map_value(key_value):
         return "false"
     elif str(key_value) == "None":
         return "null"
+    elif isinstance(key_value, int):
+        return str(key_value)    
     else:
         return "'" + str(key_value) + "'"
