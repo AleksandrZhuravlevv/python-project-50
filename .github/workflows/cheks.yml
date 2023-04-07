@@ -1,31 +1,28 @@
-name: pytest
-
-on: push
-
+name: poo poo poo
+on: 
+  - push
 jobs:
-  pytest:
-
+  test-job:
     runs-on: ubuntu-latest
-
+    strategy:
+      matrix:
+        python-version: ["3.10"]
     steps:
-      - uses: actions/checkout@master
-      - name: set up python
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
         with:
-          python-version: '3.10'
-      - name: install poetry
-        uses: snok/install-poetry@master
-      - name: install dependencies
-        run: make install
-      - name: run linter and tests
-        run:  |
-          make lint
-          make pytest
-      - name: test coverage
-        uses: paambaati/codeclimate-action@v3.2.0
-        if: github.ref_name == 'main'
+          python-version: ${{ matrix.python-version }}      
+      - name: inst-poetry
+        run: |
+          pip install poetry
+          make install
+      - name: linter
+        run: make lint
+      - name: Test & publish code coverage
+        uses: paambaati/codeclimate-action@v2.7.4
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
-          coverageCommand: make coverage
+          coverageCommand: make test-coverage
           debug: true
