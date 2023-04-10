@@ -1,53 +1,68 @@
-def stylish(diff_dict):
-    def make_sub_string(sub_dict, sub_string, depth):
-        indent = "    " * depth
-        sub_string += indent + "{\n"
-        for key, value in sorted(sub_dict.items()):
-            if isinstance(value, dict):
-                sub_string += indent + "  " + key + ": "
-                sub_string = make_sub_string(value, sub_string, depth + 1)
-            elif isinstance(value, tuple):
-                sub_string += indent
-                if len(value[0]) == 0:
-                    sub_string += "+ " + key + ": " + map_value(
-                        value[1]["value"]) + "\n"
-                elif len(value[1]) == 0:
-                    sub_string += "- " + key + ": " + map_value(
-                        value[0]["value"]) + "\n"
-                elif value[0]["value"] == value[1]["value"]:
-                    sub_string += "  " + key + ": " + map_value(
-                        value[0]["value"]) + "\n"
-                else:
-                    sub_string += "- " + key + ": " + map_value(
-                        value[0]["value"]) + "\n"
-                    sub_string += indent + "+ " + key + ": " + map_value(
-                        value[1]["value"]) + "\n"
-        sub_string += indent + "}\n"
-        return sub_string
+def build_diff(tree, depth=0):
+    result = ""
+    indent = build_indent(depth)
 
-    result = make_sub_string(diff_dict, "", 0)
+    if tree["type"] == "root":
+        result += "{\n"
+        for child in tree["children"]:
+            result += build_diff(child, depth + 1)
+        result += f"{indent}}}"
+    else:
+        name_of_property = tree["key"]
+        type_of_property = tree["type"]
+        value = map_value(tree["value"], depth)
+
+        if type_of_property == "parent":
+            result += f"{indent}{name_of_property}: {{\n"
+            for child in tree["children"]:
+                result += build_diff(child, depth + 1)
+            result += f"{indent}}}\n"
+
+        elif type_of_property == "added":
+            result += f"{indent}+ {name_of_property}: {value}\n" # noqa
+
+        elif type_of_property == "deleted":
+            result += f"{indent}- {name_of_property}: {value}\n" # noqa
+
+        elif type_of_property == "unchanged":
+            result += f"{indent}  {name_of_property}: {value}\n" # noqa
+
+        elif type_of_property == "updated":
+            old_value = map_value(tree["value1"], depth)
+            new_value = map_value(tree["value2"], depth)
+            result += f"{indent}- {name_of_property}: {old_value}\n" # noqa
+            result += f"{indent}+ {name_of_property}: {new_value}\n" # noqa
+
     return result
 
 
-def map_value(key_value):
+def map_value(key_value, depth):
     if isinstance(key_value, dict):
-        return "{\n" + map_dict_value(key_value, "    ", 1) + "    " + "}"
-    elif str(key_value) == 'True':
+        return map_dict_value(key_value, depth + 1)
+    elif key_value is True:
         return "true"
-    elif str(key_value) == 'False':
+    elif key_value is False:
         return "false"
-    elif str(key_value) == 'None':
+    elif key_value is None:
         return "null"
     else:
-        return "'" + str(key_value) + "'"
+        return str(key_value)
 
 
-def map_dict_value(value, indent, depth):
-    result = ""
+def map_dict_value(value, depth):
+    indent = build_indent(depth)
+    sub_string = ""
     for key, val in value.items():
         if isinstance(val, dict):
-            result += indent * depth + key + ": {\n" + map_dict_value(
-                val, indent, depth + 1) + indent * depth + "}\n"
+            sub_string += f"{indent}    {key}: {{\n"
+            sub_string += f"{map_dict_value(val, depth + 1)}"
+            sub_string += f"{indent}    }}\n"
         else:
-            result += indent * depth + key + ": " + map_value(val) + "\n"
-    return result
+            val = map_value(val, depth)
+            sub_string += f"{indent}    {key}: {val}\n"
+
+    return sub_string
+
+
+def build_indent(depth):
+    return "    " * depth
