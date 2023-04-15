@@ -24,7 +24,7 @@ def diff_equals(item1, item2):
             case key2 if key2 in item2 and v1 != \
                          item2[key2] and not children(v1, item2[key2]):
                 result['! ' + k1] = [check_value(v1), check_value(item2[key2])]
-            case _:
+
                 result['- ' + k1] = check_value(v1)
             case key2 if key2 in item2 and v1 != \
                          item2[key2] and children(v1, item2[key2]):
