@@ -1,70 +1,74 @@
-def children(item1, item2):
-    return isinstance(item1, dict) and isinstance(item2, dict)
-
-
-def check_value(value):
-    if isinstance(value, dict):
-        return '[complex value]'
+def children(string1, string2):
+    if isinstance(string1, dict) and isinstance(string2, dict):
+        return True
+    elif type(string1) == type(string2):
+        return False
     else:
-        return str(value)
+        return False
+
+
+def check_value(string):
+    if isinstance(string, dict):
+        for k, v in string.items():
+            return {'= ' + k: v}
+    else:
+        return string
 
 
 def diff_equals(item1, item2):
     result = {}
-    for key1, value1 in item1.items():
-        match key1:
-            case key1 if key1 in item2 and value1 == item2[key1]:
-                result[key1] = check_value(value1)
-            case key1 if key1 in item2 and not children(value1, item2[key1]):
-                result[key1] = [check_value(value1), check_value(item2[key1])]
-            case key1 if key1 not in item2:
-                result[key1] = check_value(value1)
-            case key1 if key1 in item2 and children(value1, item2[key1]):
-                result[key1] = diff_equals(value1, item2[key1])
-
-    for key2, value2 in item2.items():
-        if key2 not in item1:
-            result[key2] = check_value(value2)
-
+    for k1, v1 in item1.items():
+        match k1:
+            case key2 if key2 in item2 and v1 == item2[key2]:
+                result['= ' + k1] = check_value(v1)
+            case key2 if key2 in item2 and v1 != \
+                         item2[key2] and not children(v1, item2[key2]):
+                result['! ' + k1] = [check_value(v1), check_value(item2[key2])]
+            case _:
+                result['- ' + k1] = check_value(v1)
+            case key2 if key2 in item2 and v1 != \
+                         item2[key2] and children(v1, item2[key2]):
+                result['= ' + k1] = diff_equals(v1, item2[key2])
+    for k2, v2 in item2.items():
+        if k2 not in item1:
+            result['+ ' + k2] = check_value(v2)
     return result
 
 
 def item_equals(item):
     result = {}
     for key, value in item.items():
-        if isinstance(value, dict) and key[0]:
+        if type(value) is dict and key[0] == '=':
             result[key] = item_equals(value)
-        elif not isinstance(value, dict):
-            result[key] = value
+        elif type(value) is not dict:
+            result['= ' + key] = value
         else:
-            result[key] = item_equals(value)
+            result['= ' + key] = item_equals(value)
     return result
 
 
 def diff_lvl1(item1, item2):
     result = {}
-    for key1, value1 in item1.items():
-        if key1 in item2:
-            result[key1] = diff_equals(value1, item2[key1])
+    for k1, v1 in item1.items():
+        if k1 in item2:
+            result['= ' + k1] = diff_equals(v1, item2[k1])
         else:
-            result[key1] = item_equals(value1)
-
-    for key2, value2 in item2.items():
-        if key2 not in item1:
-            result[key2] = item_equals(value2)
-
+            result['- ' + k1] = item_equals(v1)
+    for k2, v2 in item2.items():
+        if k2 not in item1:
+            result['+ ' + k2] = item_equals(v2)
     return result
 
 
-def formatter(item):
+def formater(item):
     result = {}
-    if isinstance(item, dict):
-        result_sort = sorted(item.items(), key=lambda x: x[0])
-        for key, value in dict(result_sort).items():
-            if not isinstance(value, dict):
-                result[key] = value
-            else:
-                result[key] = formatter(value)
+    if type(item) is dict:
+        result_sort = sorted(item.items(), key=lambda x: x[0][2:])
+        for k, v in dict(result_sort).items():
+            if type(v) is not dict:
+                result[k] = v
+            elif type(v) is dict:
+                result[k] = formater(v)
     else:
         return item
     return result
@@ -72,13 +76,16 @@ def formatter(item):
 
 def format_keys(item):
     res = {}
-    for key, value in item.items():
-        res[key] = formatter(value)
-    return dict(sorted(res.items()))
+    for k, v in item.items():
+        res[k] = formater(v)
+    return dict(sorted(res.items(), key=lambda x: x[0][2:]))
 
 
 def data_from_gendiff(item1, item2):
-    if not isinstance(item1, dict) or not isinstance(item2, dict):
-        raise ValueError('Input should be dictionaries')
-    diff_dict = diff_lvl1(item1, item2)
-    return format_keys(diff_dict)
+    for k, v in item1.items():
+        if type(k) is not dict and type(v) is not dict:
+            res_dict = diff_equals(item1, item2)
+            return format_keys(res_dict)
+        else:
+            res_dict = diff_lvl1(item1, item2)
+        return format_keys(res_dict)
