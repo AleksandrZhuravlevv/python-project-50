@@ -29,7 +29,6 @@ def diff_equals(item1, item2):
                 result['= ' + k1] = diff_equals(v1, item2[key2])
             case _:
                 result['- ' + k1] = check_value(v1)
-            
     for k2, v2 in item2.items():
         if k2 not in item1:
             result['+ ' + k2] = check_value(v2)
