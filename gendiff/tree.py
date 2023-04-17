@@ -15,22 +15,19 @@ def check_value(string):
         return string
 
 
-def diff_equals(item1, item2):
+def diff_equals(ikey1, ikey2):
     result = {}
-    for k1, v1 in item1.items():
-        match k1:
-            case key2 if key2 in item2 and v1 == item2[key2]:
-                result['= ' + k1] = check_value(v1)
-            case key2 if key2 in item2 and v1 != \
-                         item2[key2] and not children(v1, item2[key2]):
-                result['! ' + k1] = [check_value(v1), check_value(item2[key2])]
-
-                result['- ' + k1] = check_value(v1)
-            case key2 if key2 in item2 and v1 != \
-                         item2[key2] and children(v1, item2[key2]):
-                result['= ' + k1] = diff_equals(v1, item2[key2])
-    for k2, v2 in item2.items():
-        if k2 not in item1:
+    for k1, v1 in ikey1.items():
+        if k1 in ikey2 and v1 == ikey2[k1]:
+            result['= ' + k1] = check_value(v1)
+        if k1 in ikey2 and v1 != ikey2[k1] and not children(v1, ikey2[k1]):
+            result['! ' + k1] = [check_value(v1), check_value(ikey2[k1])]
+        if k1 not in ikey2:
+            result['- ' + k1] = check_value(v1)
+        if k1 in ikey2 and v1 != ikey2[k1] and children(v1, ikey2[k1]):
+            result['= ' + k1] = diff_equals(v1, ikey2[k1])
+    for k2, v2 in ikey2.items():
+        if k2 not in ikey1:
             result['+ ' + k2] = check_value(v2)
     return result
 

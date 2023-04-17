@@ -1,30 +1,47 @@
-def format_value(value):
-    if isinstance(value, dict):
+def check_value(value):
+    if type(value) is dict:
         return '[complex value]'
-    elif isinstance(value, bool):
-        return str(value).lower()
+    elif type(value) is int:
+        return value
     else:
-        return f"'{str(value)}'"
+        return "'" + str(value) + "'"
 
 
-def format_plain(item, path=''):
-    result = []
+def res_plain(item, depth=''):
+    result = ''
     for key, value in item.items():
-        full_path = f"{path}.{key[2:]}" if key[0] == '!' else f"{path}{key}"
         if key[0] == '-':
-            result.append(f"Property '{full_path}' was removed")
-        elif key[0] == '+':
-            result.append(f"Property '{full_path}' was"
-                          f" added with value: {format_value(value)}")
-        elif key[0] == '!':
-            old_value = format_value(value[0])
-            new_value = format_value(value[1])
-            result.append(f"Property '{full_path}' was"
-                          f" updated. From {old_value} to {new_value}")
-        elif key[0] == '=' and isinstance(value, dict):
-            result.extend(format_plain(value, path=f"{full_path}."))
+            result += f"Property '{depth}{key[2:]}' was removed\n"
+        if key[0] == '+':
+            result += (f"Property '{depth}{key[2:]}' "
+                       f"was added with value: {check_value(value)}\n")
+        if key[0] == '!':
+            result += (f"Property '{depth}{key[2:]}' was updated."
+                       f" From {check_value(value[0])}"
+                       f" to {check_value(value[1])}\n")
+        if key[0] == '=' and type(value) is dict:
+            result += depth_plain(key, value)
     return result
 
 
+def depth_plain(key, value):
+    result = ''
+    for k1, v1 in value.items():
+        if k1[0] != '=':
+            result += res_plain({k1: v1}, depth=key[2:] + '.')
+        if k1[0] == '=' and type(v1) is dict:
+            result += depth_plain(key + "." + k1[2:], v1)
+    return result
+
+
+def replace_char(text):
+    result = (text.replace("'False'", 'false').replace("'None'", 'null')
+                  .replace("'True'", 'true'))
+    final = result.rstrip('\n')
+    return final
+
+
 def plain(item):
-    return "\n".join(format_plain(item))[1:]
+    res1 = res_plain(item)
+    rep_char = replace_char(res1)
+    return rep_char
