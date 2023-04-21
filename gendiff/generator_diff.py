@@ -1,18 +1,15 @@
+
 from .tree import data_from_gendiff
-from .formatters.stylish import stylish
-from .formatters.plain import plain
-from .formatters.json import json_f
 from .parser import parsing
+from .data import prepare_data
+from .formatters import get_formatter
 
 
 def generate_diff(file_path1: str, file_path2: str,
                   format_name: str = 'stylish') -> str:
-    dict1 = parsing(file_path1)
-    dict2 = parsing(file_path2)
-    gendiff_result = data_from_gendiff(dict1, dict2)
-    if format_name == 'stylish':
-        return stylish(gendiff_result)
-    elif format_name == 'plain':
-        return plain(gendiff_result)
-    elif format_name == 'json':
-        return json_f(gendiff_result)
+    data1, format1 = prepare_data(file_path1)
+    data2, format2 = prepare_data(file_path2)
+    parced_data1 = parsing(data1, format1)
+    parced_data2 = parsing(data2, format2)
+    diff = data_from_gendiff(parced_data1, parced_data2)
+    return get_formatter(format_name)(diff)
