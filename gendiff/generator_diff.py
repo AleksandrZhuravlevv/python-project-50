@@ -5,7 +5,8 @@ from .formatters.json import json_f
 from .parser import parsing
 
 
-def generate_diff(file_path1, file_path2, format_name='stylish'):
+def generate_diff(file_path1: str, file_path2: str,
+                  format_name: str = 'stylish') -> str:
     dict1 = parsing(file_path1)
     dict2 = parsing(file_path2)
     gendiff_result = data_from_gendiff(dict1, dict2)

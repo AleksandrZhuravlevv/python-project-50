@@ -1,5 +1,5 @@
-"""Main module."""
+import os
 
-from gendiff.generator_diff import generate_diff
 
-__all__ = ["generate_diff"]
+def get_path(file):
+    return os.path.join('tests', 'fixtures', file)
