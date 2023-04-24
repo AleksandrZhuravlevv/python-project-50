@@ -9,9 +9,7 @@ This package allows to get a difference between two json / yaml files and repres
 To install this package from GitHub on your PC enter this command in your terminal:
 
 (python3 -m pip install --user git+https://github.com/AleksandrZhuravlevv/python-project-50)
-
-
-
+Demo:
 Instruction Output:
 <a href="https://asciinema.org/a/J5cwK0YzH31a6OQqstrsCOB8x" target="_blank"><img src="https://asciinema.org/a/J5cwK0YzH31a6OQqstrsCOB8x.svg" /></a>
 
