@@ -19,6 +19,7 @@ Demo:
 
 
 Instruction Output:
+
 <a href="https://asciinema.org/a/J5cwK0YzH31a6OQqstrsCOB8x" target="_blank"><img src="https://asciinema.org/a/J5cwK0YzH31a6OQqstrsCOB8x.svg" /></a>
 
 Examples with Stylish format:
