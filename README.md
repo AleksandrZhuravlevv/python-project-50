@@ -1,5 +1,6 @@
 ### Hexlet tests and linter status:
 [![Actions Status](https://github.com/AleksandrZhuravlevv/python-project-50/workflows/hexlet-check/badge.svg)](https://github.com/AleksandrZhuravlevv/python-project-50/actions)
+![Build Status](https://github.com/AleksandrZhuravlevv/python-project-50/actions/workflows/project-check.yml/badge.svg?branch=main)
 
 <a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=F75C00&background=FFF2E700&width=435&lines=Hello%2C+I'm+Aleksandr;And+this+is+my+second+project" alt="Typing SVG" /></a>
 
