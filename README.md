@@ -2,16 +2,14 @@
 [![Actions Status](https://github.com/AleksandrZhuravlevv/python-project-50/workflows/hexlet-check/badge.svg)](https://github.com/AleksandrZhuravlevv/python-project-50/actions)
 [![Build Status](https://github.com/AleksandrZhuravlevv/python-project-50/actions/workflows/project-check.yml/badge.svg?branch=main)](https://github.com/AleksandrZhuravlevv/python-project-50/actions/workflows/project-check.yml)
 
+
+<a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=F75C00&background=FFF2E700&width=435&lines=Hello%2C+I'm+Aleksandr;And+this+is+my+second+project" alt="Typing SVG" /></a>
 This package allows to get a difference between two json / yaml files and represent it in stylish, plain or json format.
 
 To install this package from GitHub on your PC enter this command in your terminal:
 
 (python3 -m pip install --user git+https://github.com/AleksandrZhuravlevv/python-project-50)
 
-<a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=F75C00&background=FFF2E700&width=435&lines=Hello%2C+I'm+Aleksandr;And+this+is+my+second+project" alt="Typing SVG" /></a>
-
-
-Demo:
 
 
 Instruction Output:
