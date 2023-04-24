@@ -9,6 +9,8 @@ To install this package from GitHub on your PC enter this command in your termin
 (python3 -m pip install --user git+https://github.com/AleksandrZhuravlevv/python-project-50)
 
 <a href="https://git.io/typing-svg"><img src="https://readme-typing-svg.demolab.com?font=Fira+Code&pause=1000&color=F75C00&background=FFF2E700&width=435&lines=Hello%2C+I'm+Aleksandr;And+this+is+my+second+project" alt="Typing SVG" /></a>
+
+
 Demo:
 
 
