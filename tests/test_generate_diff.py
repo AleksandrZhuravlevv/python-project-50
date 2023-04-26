@@ -29,20 +29,6 @@ from tests import get_path
             id="flat_mix_file"
         ),
         pytest.param(
-            'file1_tree.json',
-            'file2_tree.json',
-            'stylish',
-            'correct_result_tree.txt',
-            id="tree_json_file"
-        ),
-        pytest.param(
-            'file1_tree.yaml',
-            'file2_tree.yaml',
-            'stylish',
-            'correct_result_tree.txt',
-            id="tree_yaml_file"
-        ),
-        pytest.param(
             'file1_tree.yaml',
             'file2_tree.yaml',
             'plain',

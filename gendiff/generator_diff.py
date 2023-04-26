@@ -1,4 +1,3 @@
-
 from .tree import data_from_gendiff
 from .parser import parsing
 from .data import prepare_data

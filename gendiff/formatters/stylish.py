@@ -1,47 +1,53 @@
-def format_stylish(item):
-    result = {}
-    for k, v in item.items():
-        if k[0] != '=' and k[0] != '!' or \
-           k[0] == '=' and not isinstance(v, dict):
-            result[k] = v
-        elif k[0] == '!':
-            result['- ' + k[2:]] = v[0]
-            result['+ ' + k[2:]] = v[1]
+import json
+
+TAB = '    '
+ACTION_STATUS = {
+    'added': '  + ',
+    'removed': '  - ',
+    'unchanged': '    '
+}
+
+
+def to_str(value):
+    """
+    Convert value from Python to json/yaml format
+    """
+    if value is None or isinstance(value, bool):
+        return json.dumps(value)
+    return str(value)
+
+
+def stringify(data, depth):
+    if isinstance(data, dict):
+        result = ['{']
+        for key, value in data.items():
+            result.append(f'{TAB * depth}{key}: {stringify(value, depth + 1)}')
+        result.append(f'{TAB * (depth - 1)}}}')
+        return '\n'.join(result)
+    return to_str(data)
+
+
+def get_stylish(data, depth=1):
+    result = ['{']
+    for key, sub_dict in data.items():
+        action = sub_dict.get('action')
+        value = sub_dict.get('value')
+        if action == 'nested':
+            result.append(f'{TAB * depth}{key}: {get_stylish(value, depth+1)}')
+        elif action == 'changed':
+            old_value = stringify(value.get('old_value'), depth + 1)
+            new_value = stringify(value.get('new_value'), depth + 1)
+            result.append(f'{TAB * (depth-1)}'
+                          f'{ACTION_STATUS["removed"]}{key}: {old_value}')
+            result.append(f'{TAB * (depth-1)}'
+                          f'{ACTION_STATUS["added"]}{key}: {new_value}')
         else:
-            result[k] = func_re(v)
-    return result
+            result.append(f'{TAB * (depth-1)}'
+                          f'{ACTION_STATUS[action]}'
+                          f'{key}: {stringify(value, depth + 1)}')
+    result.append(f'{TAB * (depth - 1)}}}')
+    return '\n'.join(result)
 
 
-def func_re(item):
-    result = {}
-    for k, v in item.items():
-        if k[0] == '!':
-            result['- ' + k[2:]] = v[0]
-            result['+ ' + k[2:]] = v[1]
-        elif k[0] == '=' and isinstance(v, dict):
-            result[k] = func_re(v)
-        else:
-            result[k] = v
-    return result
-
-
-def format_str(item, char=' ', count=2, depth=1):
-    value = '{'
-    if type(item) is dict:
-        for k, v in item.items():
-            if type(v) is dict:
-                value = value + (f'\n{char * (depth * count)}{k}: '
-                                 f'{format_str(v, char, count, depth+2)}')
-            elif type(v) is not dict:
-                value = value + f'\n{char * depth * count}{k}: {v}'
-        return value + '\n' + char * ((depth * count) - count) + '}'
-    else:
-        return str(item)
-
-
-def stylish(text):
-    fstylish = format_stylish(text)
-    dict_str = format_str(fstylish)
-    result = (dict_str.replace('False', 'false').replace('None', 'null')
-                      .replace('True', 'true').replace('=', ' '))
-    return result
+def stylish(data):
+    return get_stylish(data)

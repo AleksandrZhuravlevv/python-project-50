@@ -1,91 +1,32 @@
-def children(string1, string2):
-    if isinstance(string1, dict) and isinstance(string2, dict):
-        return True
-    elif type(string1) == type(string2):
-        return False
-    else:
-        return False
-
-
-def check_value(string):
-    if isinstance(string, dict):
-        for k, v in string.items():
-            return {'= ' + k: v}
-    else:
-        return string
-
-
-def diff_equals(item1, item2):
-    result = {}
-    for k1, v1 in item1.items():
-        match k1:
-            case key2 if key2 in item2 and v1 == item2[key2]:
-                result['= ' + k1] = check_value(v1)
-            case key2 if key2 in item2 and v1 != item2[key2]\
-                         and not children(v1, item2[key2]):
-                result['! ' + k1] = [check_value(v1), check_value(item2[key2])]
-            case key2 if key2 in item2\
-                         and v1 != item2[key2] and children(v1, item2[key2]):
-                result['= ' + k1] = diff_equals(v1, item2[key2])
-            case _:
-                result['- ' + k1] = check_value(v1)
-    for k2, v2 in item2.items():
-        if k2 not in item1:
-            result['+ ' + k2] = check_value(v2)
-    return result
-
-
-def item_equals(item):
-    result = {}
-    for key, value in item.items():
-        if type(value) is dict and key[0] == '=':
-            result[key] = item_equals(value)
-        elif type(value) is not dict:
-            result['= ' + key] = value
+def data_from_gendiff(data_1, data_2):
+    diff = dict()
+    for key in sorted(data_1.keys() | data_2.keys()):
+        if key not in data_1:
+            diff[key] = {
+                'action': 'added',
+                'value': data_2[key]
+            }
+        elif key not in data_2:
+            diff[key] = {
+                'action': 'removed',
+                'value': data_1[key]
+            }
+        elif data_1[key] == data_2[key]:
+            diff[key] = {
+                'action': 'unchanged',
+                'value': data_1[key]
+            }
+        elif isinstance(data_1[key], dict) and isinstance(data_2[key], dict):
+            diff[key] = {
+                'action': 'nested',
+                'value': data_from_gendiff(data_1[key], data_2[key])
+            }
         else:
-            result['= ' + key] = item_equals(value)
-    return result
-
-
-def diff_lvl1(item1, item2):
-    result = {}
-    for k1, v1 in item1.items():
-        if k1 in item2:
-            result['= ' + k1] = diff_equals(v1, item2[k1])
-        else:
-            result['- ' + k1] = item_equals(v1)
-    for k2, v2 in item2.items():
-        if k2 not in item1:
-            result['+ ' + k2] = item_equals(v2)
-    return result
-
-
-def formater(item):
-    result = {}
-    if type(item) is dict:
-        result_sort = sorted(item.items(), key=lambda x: x[0][2:])
-        for k, v in dict(result_sort).items():
-            if type(v) is not dict:
-                result[k] = v
-            elif type(v) is dict:
-                result[k] = formater(v)
-    else:
-        return item
-    return result
-
-
-def format_keys(item):
-    res = {}
-    for k, v in item.items():
-        res[k] = formater(v)
-    return dict(sorted(res.items(), key=lambda x: x[0][2:]))
-
-
-def data_from_gendiff(item1, item2):
-    for k, v in item1.items():
-        if type(k) is not dict and type(v) is not dict:
-            res_dict = diff_equals(item1, item2)
-            return format_keys(res_dict)
-        else:
-            res_dict = diff_lvl1(item1, item2)
-        return format_keys(res_dict)
+            diff[key] = {
+                'action': 'changed',
+                'value': {
+                    'old_value': data_1[key],
+                    'new_value': data_2[key]
+                }
+            }
+    return diff

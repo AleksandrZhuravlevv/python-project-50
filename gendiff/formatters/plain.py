@@ -1,47 +1,39 @@
-def check_value(value):
-    if type(value) is dict:
+import json
+
+
+def to_str(value):
+    """
+    Convert value from Python to plain format
+    """
+    if value is None or isinstance(value, bool):
+        return json.dumps(value)
+    if isinstance(value, str):
+        return f"'{value}'"
+    if isinstance(value, dict):
         return '[complex value]'
-    elif type(value) is int:
-        return value
-    else:
-        return "'" + str(value) + "'"
+    return value
 
 
-def res_plain(item, depth=''):
-    result = ''
-    for key, value in item.items():
-        if key[0] == '-':
-            result += f"Property '{depth}{key[2:]}' was removed\n"
-        if key[0] == '+':
-            result += (f"Property '{depth}{key[2:]}' "
-                       f"was added with value: {check_value(value)}\n")
-        if key[0] == '!':
-            result += (f"Property '{depth}{key[2:]}' was updated."
-                       f" From {check_value(value[0])}"
-                       f" to {check_value(value[1])}\n")
-        if key[0] == '=' and type(value) is dict:
-            result += depth_plain(key, value)
-    return result
+def get_plain(data, path=''):
+    result = []
+    for key, sub_dict in data.items():
+        action = sub_dict.get('action')
+        value = sub_dict.get('value')
+        full_path = path + f'.{str(key)}' if path else str(key)
+        if action == 'nested':
+            result.append(get_plain(value, full_path))
+        elif action == 'added':
+            result.append(f'Property \'{full_path}\' '
+                          f'was added with value: {to_str(value)}')
+        elif action == 'removed':
+            result.append(f'Property \'{full_path}\' was removed')
+        elif action == 'changed':
+            result.append(
+                f'Property \'{full_path}\' was updated. '
+                f'From {to_str(value.get("old_value"))} '
+                f'to {to_str(value.get("new_value"))}')
+    return '\n'.join(result)
 
 
-def depth_plain(key, value):
-    result = ''
-    for k1, v1 in value.items():
-        if k1[0] != '=':
-            result += res_plain({k1: v1}, depth=key[2:] + '.')
-        if k1[0] == '=' and type(v1) is dict:
-            result += depth_plain(key + "." + k1[2:], v1)
-    return result
-
-
-def replace_char(text):
-    result = (text.replace("'False'", 'false').replace("'None'", 'null')
-                  .replace("'True'", 'true'))
-    final = result.rstrip('\n')
-    return final
-
-
-def plain(item):
-    res1 = res_plain(item)
-    rep_char = replace_char(res1)
-    return rep_char
+def plain(data):
+    return get_plain(data)
