@@ -33,7 +33,3 @@ def get_plain(data, path=''):
                 f'From {to_str(value.get("old_value"))} '
                 f'to {to_str(value.get("new_value"))}')
     return '\n'.join(result)
-
-
-def plain(data):
-    return get_plain(data)

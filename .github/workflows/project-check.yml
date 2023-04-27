@@ -1,45 +1,33 @@
 name: test-my-project
-
-on:
-  push:
-    branches:
-      - '**'
-    tags:
-      - '**'
-
-
+on: push
+env:
+  PYTHON_KEYRING_BACKEND: keyring.backends.null.Keyring
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v4
-        with:
-          python-version: "3.10"
-
-      - name: "Install poetry"
+      - name: Check out repository code
+        uses: actions/checkout@v3
+      - name: install dependencies
         run: |
-          pip install poetry
-      - name: "Install requirements"
-        run: |
+          pip install poetry flake8 pytest
           make install
-      - name: Run linter
-        run: |
-          make lint
-      - name: Run tests
-        run: |
-          make test
-      - name: Create Reporter
-        run: |
-          curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          chmod +x ./cc-test-reporter
-          ./cc-test-reporter before-build
-      - name: Test
-        run: |
-          make test-cov
-      - name: Sending Reporter
+      - name: build
+        run: make build
+      - name: upgrade pip
+        run: python3 -m pip install --upgrade pip
+      - name: package-install
+        run: python3 -m pip install --force dist/*.whl
+      - name: make lint
+        run: make lint
+      - name: Run test
+        run: make test
+      - name: pytest-cov
+        run: make pytest-cov
+      - name: test coverage
+        uses: paambaati/codeclimate-action@v3.0.0
         env:
-          GITHUB_TOKEN: ${{ secrets.TEST_REPORTER_ID }}
-        run: |
-          ./cc-test-reporter after-build -r "$GITHUB_TOKEN"
+          CC_TEST_REPORTER_ID: 8a68a7a37653cc65b2598a90ed20d0bcae37587b908d6dd7c389cf6b186d47cc
+        with:
+          coverageCommand: make test-coverage
+          debug: true

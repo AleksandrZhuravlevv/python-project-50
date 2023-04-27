@@ -1,5 +1,5 @@
 import json
 
 
-def json_f(text):
+def get_json(text):
     return json.dumps(text, indent=4)

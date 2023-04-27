@@ -2,7 +2,7 @@ import json
 import yaml
 
 
-def parsing(data: str, format: str) -> dict:
+def parse(data: str, format: str) -> dict:
     if format in ('yml', 'yaml'):
         return yaml.safe_load(data)
     if format == 'json':

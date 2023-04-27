@@ -4,17 +4,20 @@ install:
 build:
 	poetry build
 
-publish:
-	poetry publish --dry-run
+upgrage-pip:
+	python3 -m pip install --upgrade pip
 
 package-install:
-	python3 -m pip install dist/*.whl --force-reinstall
+	python3 -m pip install --force dist/*.whl
 
 lint:
 	poetry run flake8 gendiff
 
 test:
-	poetry run pytest -vv
+	poetry run pytest
 
-test-cov:
-	poetry run pytest --cov=gendiff --cov-report xml
+pytest-cov:
+	pip install pytest-cov
+
+test-coverage:
+	pytest --cov=gendiff --cov-report xml
